@@ -43,11 +43,8 @@ async def trigger_webhook(request: Request, apikey: str = Header(None)):
     try:
         body = await request.body()
         decoded_body = body.decode()
-        print("🔹 Raw Body Received:")
-        print(decoded_body)
-
         data = json.loads(decoded_body)
-        print("🔸 Parsed JSON Data:")
+        print("🔸 Response Data:")
         for key, value in data.items():
             print(f"   {key}: {value}")
 
