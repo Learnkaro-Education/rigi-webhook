@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Header, HTTPException
+import json
 
 app = FastAPI()
 
@@ -9,7 +10,10 @@ async def trigger_webhook(request: Request, apikey: str = Header(None)):
     if apikey != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    data = await request.json()
+    try:
+        data = await request.json()
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
     print("✅ Webhook received:")
     for key, value in data.items():
@@ -17,5 +21,5 @@ async def trigger_webhook(request: Request, apikey: str = Header(None)):
 
     return {
         "message": "Webhook received successfully",
-        "received_fields": list(data.keys())  # just shows what fields you got
+        "received_fields": list(data.keys())
     }
