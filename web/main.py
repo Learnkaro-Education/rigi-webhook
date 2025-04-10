@@ -1,12 +1,10 @@
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import logging
 
 app = FastAPI()
 
 API_KEY = "a8091d5f4e66aad035ffd314df"
-
 
 class WebhookPayload(BaseModel):
     Name: str
@@ -21,18 +19,27 @@ class WebhookPayload(BaseModel):
     Time: Optional[str] = None
     ref_id: str
     event_type: str
-    payment_status: str
-
+    payment_status: str  # <--- This is what you need
 
 @app.post("/trigger-webhook")
 async def receive_webhook(
-        payload: WebhookPayload,
-        apikey: str = Header(None)
+    payload: WebhookPayload,
+    apikey: str = Header(None)
 ):
     if apikey != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    # Log or process the payload
-    logging.info(f"Received webhook: {payload.dict()}")
+    payment_status = payload.payment_status
 
-    return {"message": "Webhook received successfully"}
+    # Now you can use it however you want:
+    print(f"Received payment status: {payment_status}")
+
+    # Optional: conditional action
+    if payment_status == "failed":
+        # Handle failed payment (e.g., send alert, save to DB, etc.)
+        pass
+
+    return {
+        "message": "Webhook received successfully",
+        "payment_status": payment_status
+    }
