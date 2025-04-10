@@ -2,8 +2,6 @@ from fastapi import FastAPI, Request, Header, HTTPException
 import psycopg2
 import json
 import logging
-import gspread
-from google.auth import default
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -20,13 +18,6 @@ DB_CONFIG = {
     "host": "localhost",
     "port": "5432"
 }
-
-# Google Sheet Setup
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-creds, _ = default(scopes=SCOPES)
-gc = gspread.authorize(creds)
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1u1IecFWOmb4eOY-r_aualto0ope49lzUSptO9O1rNJU/edit"
-worksheet = gc.open_by_url(SHEET_URL).get_worksheet(0)
 
 def insert_payment(data):
     conn = psycopg2.connect(**DB_CONFIG)
@@ -75,22 +66,6 @@ def insert_payment(data):
     cur.close()
     conn.close()
 
-def append_to_google_sheet(data):
-    worksheet.append_row([
-        data.get("ref_id"),
-        data.get("event_type"),
-        data.get("Name"),
-        data.get("Amount"),
-        data.get("offer_code"),
-        data.get("offer_id"),
-        data.get("offer_discount"),
-        data.get("Email"),
-        data.get("Phone"),
-        data.get("Product"),
-        data.get("Link of Product"),
-        data.get("Time"),
-        data.get("payment_status")
-    ])
 
 @app.post("/trigger-webhook")
 async def trigger_webhook(request: Request, apikey: str = Header(None)):
@@ -108,10 +83,9 @@ async def trigger_webhook(request: Request, apikey: str = Header(None)):
             logger.info("   %s: %s", key, value)
 
         insert_payment(data)
-        append_to_google_sheet(data)
 
         return {
-            "message": "Webhook received and data saved to DB and Sheet",
+            "message": "Webhook received and data saved",
             "ref_id": data.get("ref_id"),
             "payment_status": data.get("payment_status")
         }
