@@ -24,7 +24,7 @@ def insert_payment(data):
     cur = conn.cursor()
 
     insert_query = """
-        INSERT INTO rigi_payment (
+        INSERT INTO rigi_payments (
             ref_id, event_type, Name, Amount, offer_code, offer_id, offer_discount,
             Email, Phone, Product, Link_of_Product, Time, payment_status
         ) VALUES (
