@@ -1,3 +1,24 @@
+from fastapi import FastAPI, Request, Header, HTTPException
+import psycopg2
+import json
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI()
+API_KEY = "a8091d5f4e66aad035ffd314df"
+
+# PostgreSQL connection config
+DB_CONFIG = {
+    "dbname": "rigi_payments",
+    "user": "postgres",
+    "password": "root",
+    "host": "localhost",
+    "port": "5432"
+}
+
 def insert_payment(data):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
@@ -44,3 +65,31 @@ def insert_payment(data):
     conn.commit()
     cur.close()
     conn.close()
+
+
+@app.post("/trigger-webhook")
+async def trigger_webhook(request: Request, apikey: str = Header(None)):
+    if apikey != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    try:
+        body = await request.body()
+        decoded_body = body.decode()
+        logger.info("🔹 Raw Body Received:\n%s", decoded_body)
+
+        data = json.loads(decoded_body)
+        logger.info("🔸 Parsed JSON Data:")
+        for key, value in data.items():
+            logger.info("   %s: %s", key, value)
+
+        insert_payment(data)
+
+        return {
+            "message": "Webhook received and data saved",
+            "ref_id": data.get("ref_id"),
+            "payment_status": data.get("payment_status")
+        }
+
+    except json.JSONDecodeError:
+        logger.error("❌ Invalid JSON received")
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
