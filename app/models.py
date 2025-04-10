@@ -1,21 +1,15 @@
-from sqlalchemy import Column, String, Float, Text
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
-class RigiPayment(Base):
-    __tablename__ = "rigi_payments"
-
-    ref_id = Column(String, primary_key=True)
-    event_type = Column(String)
-    Name = Column(String)
-    Amount = Column(Float)
-    offer_code = Column(String)
-    offer_id = Column(String)
-    offer_discount = Column(Float, nullable=True)
-    Email = Column(String)
-    Phone = Column(String)
-    Product = Column(String)
-    Link_of_Product = Column(Text)
-    Time = Column(String)
-    payment_status = Column(String)
+# CREATE TABLE IF NOT EXISTS rigi_payments (
+#     ref_id TEXT PRIMARY KEY,
+#     event_type TEXT,
+#     Name TEXT,
+#     Amount FLOAT,
+#     offer_code TEXT,
+#     offer_id TEXT,
+#     offer_discount FLOAT,
+#     Email TEXT,
+#     Phone TEXT,
+#     Product TEXT,
+#     Link_of_Product TEXT,
+#     Time TEXT,
+#     payment_status TEXT
+# );
